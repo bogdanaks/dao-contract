@@ -7,6 +7,9 @@ declare module "mocha" {
     DaoContract: Dao__factory;
     token: Token;
     dao: Dao;
+    jsonAbi: any[];
+    callDataFor: string;
+    callDataAgainst: string;
     owner: SignerWithAddress;
     addr1: SignerWithAddress;
     addr2: SignerWithAddress;

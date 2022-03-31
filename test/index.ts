@@ -1,8 +1,10 @@
-import { parseEther } from "ethers/lib/utils";
+import { parseEther, Interface } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 import depositTest from "./deposit";
 import voteTest from "./vote";
 import addProposalTest from "./addProposal";
+import finishProposalTest from "./finishProposal";
+import withdrawTest from "./withdraw";
 
 describe("Test functions", async function () {
   beforeEach(async function () {
@@ -20,11 +22,63 @@ describe("Test functions", async function () {
       threeDaySeconds
     );
 
+    await this.token.grantRole(await this.token.DAO_ROLE(), this.dao.address);
+
     await this.token.mint(this.owner.address, parseEther("1000"));
     await this.token.approve(this.dao.address, parseEther("1000"));
+
+    this.jsonAbi = [
+      {
+        inputs: [
+          {
+            internalType: "address",
+            name: "to",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "amount",
+            type: "uint256",
+          },
+        ],
+        name: "burn",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function",
+      },
+      {
+        inputs: [
+          {
+            internalType: "address",
+            name: "to",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "amount",
+            type: "uint256",
+          },
+        ],
+        name: "mint",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function",
+      },
+    ];
+    const interfaceJson = new Interface(this.jsonAbi);
+    this.callDataFor = interfaceJson.encodeFunctionData("burn", [
+      this.owner.address,
+      parseEther("100"),
+    ]);
+    this.callDataAgainst = interfaceJson.encodeFunctionData("mint", [
+      this.owner.address,
+      parseEther("100"),
+    ]);
   });
 
   depositTest();
   addProposalTest();
   voteTest();
+  finishProposalTest();
+  withdrawTest();
 });
